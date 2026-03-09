@@ -101,8 +101,6 @@ listings/
       ownerId: string
       createdAt: timestamp
       updatedAt: timestamp
-      rating: number
-      reviewCount: number
       openingHours: string
       amenities: string[]
 ```
