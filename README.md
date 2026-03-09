@@ -1,21 +1,22 @@
-# Kigali City Directory
+# Kigali City Services Directory
 
-A Flutter mobile application for discovering and managing places in Kigali, Rwanda which is built with Firebase Authentication, Cloud Firestore, Provider state management, and OpenStreetMap integration.
+A Flutter mobile app for discovering and managing services in Kigali, Rwanda.
+The project uses Firebase Authentication, Cloud Firestore, `flutter_bloc` state management, and OpenStreetMap via `flutter_map`.
 
 # demo video:
 
----
+## https://youtu.be/N8-GWywYkjo
 
 ## Features
 
-- **Firebase Authentication** used to Signup, login, logout with email verification
-- **Location Listings (CRUD)** used for Creating, reading, updating, and deleting place listings
-- **Search & Filter** used to Search by name, filter by category in real-time
-- **Interactive Map** using OpenStreetMap with markers for all listings
-- **Listing Detail** used for Embedded map preview + Google Maps navigation launch
-- **My Listings** used for View and manage only your own listings
-- **Settings** used for User profile to display, notification toggles, dark/light theme
-- **Real-time Firestore** used for all changes reflect instantly across screens
+- **Firebase Authentication**: Sign up, login, logout, and enforced email verification
+- **Listings CRUD**: Create, read, update, and delete service listings in Firestore
+- **Search and Category Filtering**: Real-time filtering by query and category
+- **Interactive Map**: OpenStreetMap markers for all available listings
+- **Listing Detail**: Detail page with embedded map and navigation handoff
+- **My Listings**: Manage only listings created by the signed-in user
+- **Settings and Profile**: Profile editing, notification toggles, and light/dark theme
+- **Real-time Firestore Updates**: Stream-based UI updates across screens
 
 ---
 
@@ -23,39 +24,44 @@ A Flutter mobile application for discovering and managing places in Kigali, Rwan
 
 ### Prerequisites
 
-- Flutter SDK 3.10.4+
-- Firebase project: `kigali-city`
-- Android: `google-services.json` in `android/app/`
+- Flutter SDK `^3.10.4`
+- A Firebase project connected to this app
+- Android config file: `android/app/google-services.json`
+- iOS config file: `ios/Runner/GoogleService-Info.plist` (if iOS is used)
 
 ### Firebase Services Used
 
-| Service                 | Purpose                                                  |
-| ----------------------- | -------------------------------------------------------- |
-| Firebase Authentication | Email/password signup, login, logout, email verification |
-| Cloud Firestore         | Real-time database for place listings and user profiles  |
+| Service                 | Purpose                                                   |
+| ----------------------- | --------------------------------------------------------- |
+| Firebase Authentication | Email/password sign up, login, logout, email verification |
+| Cloud Firestore         | Real-time storage for users and listings                  |
 
 ### Authentication Setup
 
-1. Firebase Console -> Authentication -> Sign-in method -> Enable **Email/Password**
-2. Email verification is enforced so that users cannot access the app until email is verified
+1. Firebase Console -> Authentication -> Sign-in method
+2. Enable **Email/Password**
+3. Keep **email verification** enabled in app flow before full access
 
 ### Firestore Setup
 
 1. Firebase Console -> Firestore Database -> Create database
-2. Security Rules:
+2. Suggested security rules:
 
-```
+```javascript
 rules_version = '2';
 service cloud.firestore {
    match /databases/{database}/documents {
       match /users/{userId} {
          allow read, write: if request.auth != null && request.auth.uid == userId;
       }
-      match /places/{placeId} {
+
+      match /listings/{listingId} {
          allow read: if request.auth != null;
          allow create: if request.auth != null;
-         allow update, delete: if request.auth != null
-            && request.auth.uid == resource.data.userId;
+         allow update, delete: if request.auth != null && (
+            resource.data.userId == request.auth.uid ||
+            resource.data.ownerId == request.auth.uid
+         );
       }
    }
 }
@@ -67,70 +73,79 @@ service cloud.firestore {
 
 ### Collection: `users`
 
-```
+```text
 users/
    {uid}/
-      uid: string
       email: string
       displayName: string
+      photoUrl: string
       createdAt: timestamp
+      notificationsEnabled: bool
 ```
 
-### Collection: `places`
+### Collection: `listings`
 
-```
-places/
-   {docId}/
+```text
+listings/
+   {listingId}/
       name: string
-      category: string        // Hospital, Cafe, Restaurant, etc.
-      address: string
-      contact: string
       description: string
+      category: string
+      address: string
+      phone: string
+      email: string
+      imageUrl: string
       latitude: number
       longitude: number
-      userId: string          // UID of the creator
-      timestamp: timestamp
+      userId: string
+      ownerId: string
+      createdAt: timestamp
+      updatedAt: timestamp
+      rating: number
+      reviewCount: number
+      openingHours: string
+      amenities: string[]
 ```
 
 ---
 
-## State Management - Provider
+## State Management - BLoC
 
-The app uses the **Provider** package for state management with a strict separation of concerns:
+The app uses **BLoC** (`flutter_bloc`) with a service layer.
 
-```
-UI Widgets
-      ↓  (reads state via Provider.of / Consumer)
-Providers  (AuthProvider, PlaceProvider)
-      ↓  (calls methods on)
-Services   (AuthService, FirestoreService)
-      ↓  (communicates with)
-Firebase   (FirebaseAuth, FirebaseFirestore)
+```text
+UI Screens/Widgets
+      -> BLoC (events/states)
+      -> Services
+      -> Firebase (Auth + Firestore)
 ```
 
-| Provider          | Responsibility                                  |
-| ----------------- | ----------------------------------------------- |
-| `AuthProvider`    | Holds current user, exposes login/signup/logout |
-| `PlaceProvider`   | Exposes place stream, add/update/delete methods |
-| `ThemeProvider`   | Light/dark theme switching                      |
-| `BookingProvider` | Booking state management                        |
-
-**UI widgets never call Firebase directly** so all Firebase operations go through the service layer.
+| BLoC             | Responsibility                                                |
+| ---------------- | ------------------------------------------------------------- |
+| `AuthBloc`       | Session checks, login/signup/logout, email verification flow  |
+| `ListingBloc`    | Public listings stream, search, category filtering, selection |
+| `MyListingsBloc` | User-scoped listing stream and listing CRUD actions           |
+| `SettingsBloc`   | Theme mode and settings toggles persistence                   |
 
 ---
 
 ## Navigation Structure
 
-```
+```text
 AuthWrapper
-├── LoginScreen         (if not logged in)
-├── EmailVerificationScreen  (if logged in but not verified)
-└── MainNavigationScreen    (if fully authenticated)
-         ├── Tab 0: PlacesListScreen    (Directory)
-         ├── Tab 1: MyListingsScreen    (My Listings)
-         ├── Tab 2: BookingsScreen      (Bookings)
-         ├── Tab 3: MapScreen           (Map View)
-         └── Tab 4: SettingsScreen      (Settings)
+├── LoginScreen                    (unauthenticated)
+├── EmailVerificationScreen        (authenticated but not verified)
+└── MainShell                      (authenticated + verified)
+      ├── Tab 0: DirectoryScreen
+      ├── Tab 1: MyListingsScreen
+      ├── Tab 2: MapViewScreen
+      └── Tab 3: SettingsScreen
+
+Additional routes:
+- ListingDetailScreen
+- AddEditListingScreen
+- NavigationMapScreen
+- ProfileScreen
 ```
 
 ---
@@ -138,15 +153,13 @@ AuthWrapper
 ## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/h-mutumwinka/Kigali_Directory.git
-cd Kigali_Directory
-cd kigali_city_directory
+# Open project
+cd service-app
 
 # Install dependencies
 flutter pub get
 
-# Run on Android
+# Run app
 flutter run
 ```
 
@@ -154,39 +167,51 @@ flutter run
 
 ## Project Structure
 
-```
+```text
 lib/
-├── main.dart                     # App entry point, Firebase init, MultiProvider
-├── firebase_options.dart         # Firebase configuration per platform
+├── main.dart
+├── firebase_options.dart
+├── bloc/
+│   ├── auth/
+│   ├── listing/
+│   ├── my_listings/
+│   └── settings/
 ├── models/
-│   ├── place_model.dart          # Place data model + Firestore serialization
-│   ├── user_model.dart           # UserProfile model
-│   └── booking_model.dart        # Booking model
-├── providers/
-│   ├── auth_provider.dart        # Authentication state
-│   ├── place_provider.dart       # Place listings state
-│   ├── booking_provider.dart     # Bookings state
-│   └── theme_provider.dart       # Theme state
+│   ├── user_model.dart
+│   ├── listing_model.dart
+│   ├── category_model.dart
+│   ├── favorite_model.dart
+│   └── review_model.dart
 ├── services/
-│   ├── auth_service.dart         # Firebase Auth operations
-│   ├── firestore_service.dart    # Firestore CRUD + seed data
-│   ├── user_service.dart         # User profile Firestore operations
-│   └── booking_service.dart      # Booking Firestore operations
+│   ├── auth_service.dart
+│   ├── listing_service.dart
+│   ├── settings_service.dart
+│   ├── favorite_service.dart
+│   └── review_service.dart
 ├── screens/
-│   ├── auth_wrapper.dart         # Auth state router
+│   ├── auth_wrapper.dart
 │   ├── login_screen.dart
 │   ├── signup_screen.dart
 │   ├── email_verification_screen.dart
-│   ├── navigation_screen.dart    # BottomNavigationBar
-│   ├── place_list_screen.dart    # Directory (search + filter)
-│   ├── my_listing_screen.dart    # User's own listings
-│   ├── create_place_screen.dart  # Add new listing
-│   ├── edit_place_screen.dart    # Edit listing
-│   ├── listing_detail_screen.dart # Detail + embedded map
-│   ├── screen_map.dart           # Full map with all markers
-│   └── settings_screen.dart      # Profile + preferences
-└── widgets/
-      └── listing_cards.dart        # Reusable place card widget
+│   ├── main_shell.dart
+│   ├── directory_screen.dart
+│   ├── my_listings_screen.dart
+│   ├── add_edit_listing_screen.dart
+│   ├── listing_detail_screen.dart
+│   ├── map_view_screen.dart
+│   ├── navigation_map_screen.dart
+│   ├── profile_screen.dart
+│   ├── settings_screen.dart
+│   ├── booking_screen.dart
+│   ├── review_screen.dart
+│   └── detail_page.dart
+├── widgets/
+│   ├── listing_card.dart
+│   ├── category_chip.dart
+│   └── search_bar_widget.dart
+├── domain/
+├── data/
+└── utils/
 ```
 
 ---
@@ -194,11 +219,15 @@ lib/
 ## Dependencies
 
 ```yaml
-firebase_core: ^3.15.2
-firebase_auth: ^5.3.1
-cloud_firestore: ^5.6.12
-provider: ^6.1.2
-flutter_map: ^7.0.2
+firebase_core: ^3.8.1
+firebase_auth: ^5.3.4
+cloud_firestore: ^5.6.0
+flutter_bloc: ^9.0.0
+equatable: ^2.0.7
+flutter_map: ^8.2.1
 latlong2: ^0.9.1
-url_launcher: ^6.3.0
+url_launcher: ^6.3.1
+geolocator: ^13.0.2
+shared_preferences: ^2.3.4
+uuid: ^4.5.1
 ```
