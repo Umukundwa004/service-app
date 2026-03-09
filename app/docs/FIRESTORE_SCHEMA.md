@@ -3,6 +3,7 @@
 ## Collections
 
 ### users/{uid}
+
 - id: string (doc id)
 - email: string
 - displayName: string
@@ -11,6 +12,7 @@
 - notificationsEnabled: bool (optional)
 
 ### listings/{listingId}
+
 - name: string
 - description: string
 - category: string
@@ -30,6 +32,7 @@
 - amenities: string[]
 
 ## Notes
+
 - `userId` is the primary ownership key.
 - `ownerId` remains for backward compatibility while migrating older records.
 - Listing IDs are deterministic and created by the app for stable updates/deletes.
