@@ -85,8 +85,9 @@ class ListingService {
 
   // Search listings by name (local filtering - for real-time search)
   List<ListingModel> searchListings(List<ListingModel> listings, String query) {
-    if (query.isEmpty) return listings;
-    final lowerQuery = query.toLowerCase();
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.isEmpty) return listings;
+    final lowerQuery = normalizedQuery.toLowerCase();
     return listings.where((listing) {
       return listing.name.toLowerCase().contains(lowerQuery) ||
           listing.description.toLowerCase().contains(lowerQuery) ||
@@ -99,10 +100,17 @@ class ListingService {
     List<ListingModel> listings,
     String? category,
   ) {
-    if (category == null || category.isEmpty || category == 'all') {
+    final normalizedCategory = category?.trim().toLowerCase();
+
+    if (normalizedCategory == null ||
+        normalizedCategory.isEmpty ||
+        normalizedCategory == 'all') {
       return listings;
     }
-    return listings.where((listing) => listing.category == category).toList();
+
+    return listings
+        .where((listing) => listing.category.toLowerCase() == normalizedCategory)
+        .toList();
   }
 
   // Get all listings (one-time fetch)
