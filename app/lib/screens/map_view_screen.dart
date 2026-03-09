@@ -40,12 +40,33 @@ class _MapViewScreenState extends State<MapViewScreen> {
     return isInRange && isNotZeroPoint;
   }
 
+  latlng.LatLng _fallbackPointFor(ListingModel listing) {
+    final hash = listing.id.hashCode.abs();
+    final radiusLat = 0.03;
+    final radiusLng = 0.03;
+
+    final latOffset = ((hash % 1000) / 1000.0 - 0.5) * 2 * radiusLat;
+    final lngOffset = (((hash ~/ 1000) % 1000) / 1000.0 - 0.5) * 2 * radiusLng;
+
+    return latlng.LatLng(
+      _defaultLocation.latitude + latOffset,
+      _defaultLocation.longitude + lngOffset,
+    );
+  }
+
+  latlng.LatLng _markerPointFor(ListingModel listing) {
+    if (_hasValidCoordinates(listing)) {
+      return latlng.LatLng(listing.latitude, listing.longitude);
+    }
+    return _fallbackPointFor(listing);
+  }
+
   List<Marker> _buildMarkers(List<ListingModel> listings) {
     return listings.map((listing) {
       final isSelected = _selectedListing?.id == listing.id;
 
       return Marker(
-        point: latlng.LatLng(listing.latitude, listing.longitude),
+        point: _markerPointFor(listing),
         width: isSelected ? 46 : 38,
         height: isSelected ? 46 : 38,
         child: GestureDetector(
@@ -75,9 +96,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
   void _fitBounds(List<ListingModel> listings) {
     if (listings.isEmpty) return;
 
-    final points = listings
-        .map((listing) => latlng.LatLng(listing.latitude, listing.longitude))
-        .toList();
+    final points = listings.map(_markerPointFor).toList();
 
     final first = points.first;
     final hasSpread = points.any(
@@ -143,8 +162,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
             );
           }
 
-          final listings = state.listings;
-          final mapListings = listings.where(_hasValidCoordinates).toList();
+          final mapListings = state.listings;
           final markers = _buildMarkers(mapListings);
 
           if (mapListings.isNotEmpty &&
@@ -310,10 +328,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
 
           if (matched.isNotEmpty) {
             final first = matched.first;
-            _mapController.move(
-              latlng.LatLng(first.latitude, first.longitude),
-              15,
-            );
+            _mapController.move(_markerPointFor(first), 15);
 
             setState(() {
               _selectedListing = first;

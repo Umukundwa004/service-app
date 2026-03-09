@@ -25,26 +25,32 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late String _displayName;
-  late String _email;
-  late String _photoUrl;
+  String? _overrideDisplayName;
+  String? _overridePhotoUrl;
 
   @override
   void initState() {
     super.initState();
-    _displayName = widget.userName ?? 'Demo User';
-    _email = widget.userEmail ?? 'demo@example.com';
-    _photoUrl = widget.userPhotoUrl ?? '';
+    context.read<SettingsBloc>().add(const LoadSettings());
+  }
 
-    final authState = context.read<AuthBloc>().state;
+  ({String displayName, String email, String photoUrl}) _profileFromAuthState(
+    AuthState authState,
+  ) {
     if (authState.status == AuthStatus.authenticated &&
         authState.user != null) {
-      _displayName = authState.user!.displayName;
-      _email = authState.user!.email;
-      _photoUrl = authState.user!.photoUrl;
+      return (
+        displayName: _overrideDisplayName ?? authState.user!.displayName,
+        email: authState.user!.email,
+        photoUrl: _overridePhotoUrl ?? authState.user!.photoUrl,
+      );
     }
 
-    context.read<SettingsBloc>().add(const LoadSettings());
+    return (
+      displayName: _overrideDisplayName ?? widget.userName ?? 'User',
+      email: widget.userEmail ?? 'Not signed in',
+      photoUrl: _overridePhotoUrl ?? widget.userPhotoUrl ?? '',
+    );
   }
 
   @override
@@ -97,66 +103,74 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildProfileSection() {
-    return Container(
-      color: Colors.deepPurple,
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: Colors.white,
-            backgroundImage: _photoUrl.isNotEmpty
-                ? NetworkImage(_photoUrl)
-                : null,
-            child: _photoUrl.isEmpty
-                ? Icon(
-                    Icons.person,
-                    size: 40,
-                    color: Colors.deepPurple.shade300,
-                  )
-                : null,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _displayName,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        final profile = _profileFromAuthState(authState);
+
+        return Container(
+          color: Colors.deepPurple,
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 40,
+                backgroundColor: Colors.white,
+                backgroundImage: profile.photoUrl.isNotEmpty
+                    ? NetworkImage(profile.photoUrl)
+                    : null,
+                child: profile.photoUrl.isEmpty
+                    ? Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Colors.deepPurple.shade300,
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      profile.displayName,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      profile.email,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _email,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                ),
-              ],
-            ),
+              ),
+              IconButton(
+                onPressed: () => _openProfileScreen(profile),
+                icon: const Icon(Icons.edit, color: Colors.white),
+              ),
+            ],
           ),
-          IconButton(
-            onPressed: _openProfileScreen,
-            icon: const Icon(Icons.edit, color: Colors.white),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Future<void> _openProfileScreen() async {
+  Future<void> _openProfileScreen(
+    ({String displayName, String email, String photoUrl}) profile,
+  ) async {
     final updatedProfile = await Navigator.push<Map<String, String>>(
       context,
       MaterialPageRoute(
         builder: (_) => ProfileScreen(
-          userEmail: _email,
-          displayName: _displayName,
-          photoUrl: _photoUrl,
+          userEmail: profile.email,
+          displayName: profile.displayName,
+          photoUrl: profile.photoUrl,
         ),
       ),
     );
@@ -166,8 +180,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     setState(() {
-      _displayName = updatedProfile['displayName'] ?? _displayName;
-      _photoUrl = updatedProfile['photoUrl'] ?? _photoUrl;
+      _overrideDisplayName =
+          updatedProfile['displayName'] ?? _overrideDisplayName;
+      _overridePhotoUrl = updatedProfile['photoUrl'] ?? _overridePhotoUrl;
     });
 
     context.read<AuthBloc>().add(const AuthCheckRequested());

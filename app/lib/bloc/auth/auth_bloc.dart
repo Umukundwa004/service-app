@@ -54,7 +54,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await _authService.createUserProfile(userModel);
       }
 
-      emit(AuthState.authenticated(userModel));
+      if (_authService.isEmailVerified) {
+        emit(AuthState.authenticated(userModel));
+      } else {
+        emit(AuthState.emailNotVerified(userModel));
+      }
     } catch (e) {
       emit(AuthState.error('Failed to load user profile: ${e.toString()}'));
     }
@@ -117,7 +121,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await _authService.createUserProfile(userModel);
       }
 
-      emit(AuthState.authenticated(userModel));
+      if (_authService.isEmailVerified) {
+        emit(AuthState.authenticated(userModel));
+      } else {
+        emit(AuthState.emailNotVerified(userModel));
+      }
     } on FirebaseAuthException catch (e) {
       emit(AuthState.error(_getAuthErrorMessage(e.code)));
     } on FirebaseException catch (e) {

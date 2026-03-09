@@ -10,7 +10,6 @@ import 'bloc/settings/settings_bloc.dart';
 import 'bloc/settings/settings_event.dart';
 import 'bloc/settings/settings_state.dart';
 import 'services/auth_service.dart';
-import 'services/email_otp_service.dart';
 import 'services/listing_service.dart';
 import 'services/settings_service.dart';
 import 'screens/auth_wrapper.dart';
@@ -20,11 +19,6 @@ void main() async {
 
   // Initialize Firebase with platform-specific options
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  EmailOtpService.configureSmtp(
-    username: const String.fromEnvironment('OTP_SMTP_EMAIL'),
-    appPassword: const String.fromEnvironment('OTP_SMTP_PASSWORD'),
-  );
 
   runApp(const MyApp());
 }

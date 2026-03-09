@@ -37,16 +37,15 @@ class ListingService {
 
   // Get user's listings as a stream
   Stream<List<ListingModel>> getUserListingsStream(String userId) {
-    return _firestore
-        .collection(_collection)
-        .where('userId', isEqualTo: userId)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => ListingModel.fromMap(doc.data(), doc.id))
-              .toList(),
-        );
+    return _firestore.collection(_collection).snapshots().map((snapshot) {
+      final listings = snapshot.docs
+          .map((doc) => ListingModel.fromMap(doc.data(), doc.id))
+          .where((listing) => listing.userId == userId)
+          .toList();
+
+      listings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return listings;
+    });
   }
 
   // Get a single listing by ID
@@ -60,10 +59,15 @@ class ListingService {
 
   // Add a new listing
   Future<String> addListing(ListingModel listing) async {
-    final docRef = await _firestore
+    if (listing.userId.trim().isEmpty) {
+      throw Exception('Listing owner is missing. Please sign in again.');
+    }
+
+    await _firestore
         .collection(_collection)
-        .add(listing.toMap());
-    return docRef.id;
+        .doc(listing.id)
+        .set(listing.toMap());
+    return listing.id;
   }
 
   // Update a listing

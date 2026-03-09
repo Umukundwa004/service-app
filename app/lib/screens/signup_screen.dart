@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/auth/auth_event.dart';
 import '../bloc/auth/auth_state.dart';
-import '../services/email_otp_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -20,7 +19,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _isSendingOtp = false;
 
   @override
   void dispose() {
@@ -35,36 +33,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
-
-    setState(() {
-      _isSendingOtp = true;
-    });
-
     final email = _emailController.text.trim();
-    final success = await EmailOtpService.sendCode(email);
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _isSendingOtp = false;
-    });
-
-    if (!success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to send OTP. Check SMTP setup and try again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final isVerified = await _showOtpVerificationDialog();
-    if (!mounted || !isVerified) {
-      return;
-    }
 
     context.read<AuthBloc>().add(
       AuthSignUpRequested(
@@ -73,55 +42,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         displayName: _nameController.text.trim(),
       ),
     );
-  }
-
-  Future<bool> _showOtpVerificationDialog() async {
-    final otpController = TextEditingController();
-
-    final isVerified = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Verify OTP'),
-          content: TextField(
-            controller: otpController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Enter OTP code',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final code = otpController.text.trim();
-                final ok = EmailOtpService.verifyCode(code);
-                Navigator.of(dialogContext).pop(ok);
-              },
-              child: const Text('Verify'),
-            ),
-          ],
-        );
-      },
-    );
-
-    otpController.dispose();
-
-    if ((isVerified ?? false) == false && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Invalid OTP code.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-
-    return isVerified ?? false;
   }
 
   @override
@@ -311,8 +231,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     // Sign Up Button
                     BlocBuilder<AuthBloc, AuthState>(
                       builder: (context, state) {
-                        final isLoading =
-                            state.status == AuthStatus.loading || _isSendingOtp;
+                        final isLoading = state.status == AuthStatus.loading;
                         return ElevatedButton(
                           onPressed: isLoading ? null : _handleSignUp,
                           style: ElevatedButton.styleFrom(
@@ -332,9 +251,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   ),
                                 )
                               : Text(
-                                  _isSendingOtp
-                                      ? 'Sending OTP...'
-                                      : 'Create Account',
+                                  'Create Account',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -346,11 +263,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     const SizedBox(height: 24),
 
                     // Sign In Link
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 4,
                       children: [
                         Text(
-                          'Already have an account? ',
+                          'Already have an account?',
                           style: TextStyle(color: Colors.grey[600]),
                         ),
                         TextButton(
