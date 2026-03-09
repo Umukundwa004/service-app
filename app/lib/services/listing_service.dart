@@ -109,7 +109,9 @@ class ListingService {
     }
 
     return listings
-        .where((listing) => listing.category.toLowerCase() == normalizedCategory)
+        .where(
+          (listing) => listing.category.toLowerCase() == normalizedCategory,
+        )
         .toList();
   }
 
