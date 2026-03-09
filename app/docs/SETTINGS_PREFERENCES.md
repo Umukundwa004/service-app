@@ -1,15 +1,22 @@
 # Settings Preferences
 
-## Persisted preferences
-- notifications enabled
-- location-based notifications enabled
-- dark mode enabled
+## Current persisted settings
 
-## Persistence layer
-- Local simulation via SharedPreferences.
-- Loaded by `SettingsBloc` on screen open.
-- Updated immediately when toggles are changed.
+- Push notifications toggle
+- Location-based notifications toggle
+- Dark mode toggle
 
-## Design trade-off
-- Local persistence is fast and simple.
-- Preferences are device-specific unless synced to backend later.
+## Persistence mechanism
+
+- Preferences are stored with `SharedPreferences`.
+- `SettingsBloc` loads values on screen entry using `LoadSettings`.
+- Each toggle dispatches an event and persists immediately.
+
+## Why local simulation
+
+- Meets feature requirements without backend complexity.
+- Works offline and keeps settings interactions fast.
+
+## Future extension
+
+- Sync these values to `users/{uid}` for cross-device consistency.
