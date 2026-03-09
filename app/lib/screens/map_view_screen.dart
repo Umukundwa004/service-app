@@ -316,14 +316,16 @@ class _MapViewScreenState extends State<MapViewScreen> {
       child: TextField(
         onChanged: (query) {
           if (query.trim().isEmpty) {
+            setState(() {
+              _selectedListing = null;
+            });
             return;
           }
 
           final lower = query.trim().toLowerCase();
           final currentListings = context.read<ListingBloc>().state.listings;
           final matched = currentListings.where((listing) {
-            return listing.name.toLowerCase().contains(lower) &&
-                _hasValidCoordinates(listing);
+            return listing.name.toLowerCase().contains(lower);
           }).toList();
 
           if (matched.isNotEmpty) {
