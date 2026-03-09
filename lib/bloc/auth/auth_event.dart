@@ -21,6 +21,7 @@ class AuthSignInRequested extends AuthEvent {
   List<Object?> get props => [email, password];
 }
 
+// Triggered when user submits registration credentials.
 class AuthSignUpRequested extends AuthEvent {
   final String email;
   final String password;
@@ -47,3 +48,4 @@ class AuthSendVerificationEmail extends AuthEvent {
 class AuthCheckEmailVerified extends AuthEvent {
   const AuthCheckEmailVerified();
 }
+

@@ -14,9 +14,11 @@ class AuthService {
   User? get currentUser => _auth.currentUser;
 
   // Auth state changes stream
+  // Stream auth state to keep UI and BLoC synchronized with Firebase session changes.
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   // Get user profile from Firestore
+  // Resolve app-specific user profile from Firestore using Firebase UID.
   Future<UserModel?> getUserProfile(String userId) async {
     final doc = await _firestore.collection('users').doc(userId).get();
     if (doc.exists) {
@@ -78,6 +80,7 @@ class AuthService {
 
   // Sign in with email and password
   Future<UserCredential> signInWithEmail(String email, String password) async {
+    // Sign in against Firebase Authentication credentials.
     return await _auth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -90,6 +93,7 @@ class AuthService {
     String password,
     String displayName,
   ) async {
+    // Create Firebase Auth account, then persist profile document in Firestore.
     final credential = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
@@ -123,6 +127,7 @@ class AuthService {
   }
 
   // Sign out
+  // Clear Firebase session and return to unauthenticated flow.
   Future<void> signOut() async {
     await _auth.signOut();
   }
@@ -134,3 +139,8 @@ class AuthService {
     });
   }
 }
+
+
+
+
+

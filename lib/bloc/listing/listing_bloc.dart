@@ -57,6 +57,7 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     );
   }
 
+  // Recompute filtered listings when search text changes.
   void _onSearchListings(SearchListings event, Emitter<ListingState> emit) {
     final filtered = _applyFilters(
       state.listings,
@@ -66,6 +67,7 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     emit(state.copyWith(searchQuery: event.query, filteredListings: filtered));
   }
 
+  // Recompute filtered listings when category filter changes.
   void _onFilterByCategory(
     FilterListingsByCategory event,
     Emitter<ListingState> emit,
@@ -131,6 +133,7 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     emit(state.copyWith(clearSelectedListing: true));
   }
 
+  // Apply combined search + category filters to the current listing collection.
   List<ListingModel> _applyFilters(
     List<ListingModel> listings,
     String searchQuery,
@@ -153,3 +156,6 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     return super.close();
   }
 }
+
+
+

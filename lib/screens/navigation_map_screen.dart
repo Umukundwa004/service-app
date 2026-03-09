@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart' as latlng;
 import 'package:url_launcher/url_launcher.dart';
 import '../models/listing_model.dart';
 
+// Dedicated map screen focused on destination navigation context.
 class NavigationMapScreen extends StatefulWidget {
   final ListingModel destination;
   final List<ListingModel> allListings;
@@ -22,6 +23,7 @@ class _NavigationMapScreenState extends State<NavigationMapScreen> {
   final MapController _mapController = MapController();
   double _currentZoom = 14;
 
+  // Ensure only valid coordinates are shown as navigation markers.
   bool _hasValidCoordinates(ListingModel listing) {
     final lat = listing.latitude;
     final lng = listing.longitude;
@@ -48,6 +50,7 @@ class _NavigationMapScreenState extends State<NavigationMapScreen> {
       final isDestination = listing.id == widget.destination.id;
 
       return Marker(
+        // Build marker from persisted listing coordinates.
         point: latlng.LatLng(listing.latitude, listing.longitude),
         width: isDestination ? 48 : 38,
         height: isDestination ? 48 : 38,
@@ -211,3 +214,6 @@ class _NavigationMapScreenState extends State<NavigationMapScreen> {
     );
   }
 }
+
+
+

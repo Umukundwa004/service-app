@@ -10,6 +10,7 @@ class ListingModel extends Equatable {
   final String phone;
   final String email;
   final String imageUrl;
+  // Stored coordinates used for map markers and navigation.
   final double latitude;
   final double longitude;
   final String userId;
@@ -50,6 +51,7 @@ class ListingModel extends Equatable {
       phone: map['phone'] ?? '',
       email: map['email'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
+      // Parse persisted coordinates from Firestore payload.
       latitude: (map['latitude'] ?? 0.0).toDouble(),
       longitude: (map['longitude'] ?? 0.0).toDouble(),
       userId: map['userId'] ?? map['ownerId'] ?? '',
@@ -71,6 +73,7 @@ class ListingModel extends Equatable {
       'phone': phone,
       'email': email,
       'imageUrl': imageUrl,
+      // Persist coordinates so listings can be rendered geographically.
       'latitude': latitude,
       'longitude': longitude,
       'userId': userId,
@@ -145,3 +148,6 @@ class ListingModel extends Equatable {
     amenities,
   ];
 }
+
+
+

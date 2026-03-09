@@ -39,11 +39,13 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
     super.dispose();
   }
 
+  // Dispatch search event on text updates.
   void _onSearchChanged(String query) {
     setState(() {});
     context.read<ListingBloc>().add(SearchListings(query));
   }
 
+  // Toggle and dispatch selected category filter.
   void _onCategorySelected(String? category) {
     setState(() {
       _selectedCategory = category == _selectedCategory ? null : category;
@@ -53,6 +55,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
     );
   }
 
+  // Open detail page from the directory list.
   void _navigateToDetail(ListingModel listing) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -150,6 +153,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: SearchBarWidget(
         controller: _searchController,
+        // Search bar is wired to ListingBloc filtering.
         onChanged: _onSearchChanged,
         hintText: 'Search services, places...',
       ),
@@ -175,6 +179,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
               label: category.name,
               icon: _getCategoryIcon(category.icon),
               isSelected: _selectedCategory == category.id,
+              // Category chips trigger bloc filter updates.
               onTap: () => _onCategorySelected(category.id),
             ),
           ),
@@ -323,3 +328,8 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
     );
   }
 }
+
+
+
+
+

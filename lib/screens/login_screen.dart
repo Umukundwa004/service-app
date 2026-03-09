@@ -27,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleLogin() {
     if (_formKey.currentState?.validate() ?? false) {
+      // Dispatch sign-in event to AuthBloc instead of calling Firebase directly from UI.
       context.read<AuthBloc>().add(
         AuthSignInRequested(
           email: _emailController.text.trim(),
@@ -219,3 +220,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

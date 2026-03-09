@@ -23,6 +23,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
     context.read<MyListingsBloc>().add(LoadMyListings(widget.userId));
   }
 
+  // Open listing details screen for a selected item.
   void _navigateToDetail(ListingModel listing) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -31,6 +32,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
     );
   }
 
+  // Route to create-listing form.
   void _navigateToAddListing() {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -39,6 +41,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
     );
   }
 
+  // Route to edit form with existing listing prefilled.
   void _navigateToEditListing(ListingModel listing) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -48,6 +51,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
     );
   }
 
+  // Confirm and dispatch delete event for selected listing.
   void _deleteListing(String listingId) {
     showDialog(
       context: context,
@@ -302,3 +306,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
     );
   }
 }
+
+
+
+

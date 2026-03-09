@@ -21,6 +21,7 @@ class ListingsUpdated extends ListingEvent {
   List<Object?> get props => [listings];
 }
 
+// Event fired when user changes search query.
 class SearchListings extends ListingEvent {
   final String query;
 
@@ -30,6 +31,7 @@ class SearchListings extends ListingEvent {
   List<Object?> get props => [query];
 }
 
+// Event fired when user applies or clears category filter.
 class FilterListingsByCategory extends ListingEvent {
   final String? category;
 
@@ -78,3 +80,5 @@ class SelectListing extends ListingEvent {
 class ClearSelection extends ListingEvent {
   const ClearSelection();
 }
+
+

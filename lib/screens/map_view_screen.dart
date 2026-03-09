@@ -16,6 +16,7 @@ class MapViewScreen extends StatefulWidget {
 }
 
 class _MapViewScreenState extends State<MapViewScreen> {
+  // Controls map camera position and zoom interactions.
   final MapController _mapController = MapController();
   ListingModel? _selectedListing;
   int _lastFittedMarkerCount = -1;
@@ -30,6 +31,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
     context.read<ListingBloc>().add(const LoadListings());
   }
 
+  // Validate persisted coordinates before creating markers.
   bool _hasValidCoordinates(ListingModel listing) {
     final lat = listing.latitude;
     final lng = listing.longitude;
@@ -54,6 +56,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
     );
   }
 
+  // Use stored coordinates, or fallback point when coordinates are invalid.
   latlng.LatLng _markerPointFor(ListingModel listing) {
     if (_hasValidCoordinates(listing)) {
       return latlng.LatLng(listing.latitude, listing.longitude);
@@ -178,6 +181,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
           return Stack(
             children: [
               FlutterMap(
+                // Render listings as markers on flutter_map.
                 mapController: _mapController,
                 options: MapOptions(
                   initialCenter: _defaultLocation,
@@ -502,3 +506,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
     );
   }
 }
+
+
+
+

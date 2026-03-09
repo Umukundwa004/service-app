@@ -9,6 +9,7 @@ class ListingService {
     : _firestore = firestore ?? FirebaseFirestore.instance;
 
   // Get all listings as a stream
+  // Real-time stream of all listings for directory and map views.
   Stream<List<ListingModel>> getListingsStream() {
     return _firestore
         .collection(_collection)
@@ -58,6 +59,7 @@ class ListingService {
   }
 
   // Add a new listing
+  // Create listing document in Firestore using generated/assigned ID.
   Future<String> addListing(ListingModel listing) async {
     if (listing.userId.trim().isEmpty) {
       throw Exception('Listing owner is missing. Please sign in again.');
@@ -71,6 +73,7 @@ class ListingService {
   }
 
   // Update a listing
+  // Update listing fields and refresh updatedAt timestamp.
   Future<void> updateListing(ListingModel listing) async {
     await _firestore
         .collection(_collection)
@@ -79,11 +82,13 @@ class ListingService {
   }
 
   // Delete a listing
+  // Remove listing document by ID.
   Future<void> deleteListing(String id) async {
     await _firestore.collection(_collection).doc(id).delete();
   }
 
   // Search listings by name (local filtering - for real-time search)
+  // Client-side text search across listing name, category, and description.
   List<ListingModel> searchListings(List<ListingModel> listings, String query) {
     final normalizedQuery = query.trim();
     if (normalizedQuery.isEmpty) return listings;
@@ -96,6 +101,7 @@ class ListingService {
   }
 
   // Filter listings by category (local filtering)
+  // Client-side category filter used by ListingBloc.
   List<ListingModel> filterByCategory(
     List<ListingModel> listings,
     String? category,
@@ -126,3 +132,9 @@ class ListingService {
         .toList();
   }
 }
+
+
+
+
+
+

@@ -6,6 +6,7 @@ import 'email_verification_screen.dart';
 import 'login_screen.dart';
 import 'main_shell.dart';
 
+// Top-level gate that routes users based on authentication state.
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
@@ -29,6 +30,7 @@ class AuthWrapper extends StatelessWidget {
               ),
             );
           case AuthStatus.authenticated:
+            // Authenticated users enter the main tabbed shell.
             return MainShell(
               userId: state.user!.id,
               userEmail: state.user!.email,
@@ -44,3 +46,5 @@ class AuthWrapper extends StatelessWidget {
     );
   }
 }
+
+

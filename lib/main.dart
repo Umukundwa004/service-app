@@ -15,9 +15,11 @@ import 'services/settings_service.dart';
 import 'screens/auth_wrapper.dart';
 
 void main() async {
+  // Ensure Flutter bindings are ready before async app setup.
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase with platform-specific options
+  // Initialize Firebase once using generated platform options.
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
@@ -28,6 +30,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Service instances are injected into BLoCs through providers.
     // Initialize services
     final authService = AuthService();
     final listingService = ListingService();
@@ -112,6 +115,7 @@ class MyApp extends StatelessWidget {
                   ),
                 ),
               ),
+              // AuthWrapper decides whether to show auth flow or main app shell.
               home: const AuthWrapper(),
             );
           },
@@ -120,3 +124,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+
+
+

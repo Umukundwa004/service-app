@@ -35,6 +35,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
     final email = _emailController.text.trim();
 
+    // Dispatch sign-up event so business logic stays in AuthBloc/AuthService.
     context.read<AuthBloc>().add(
       AuthSignUpRequested(
         email: email,
@@ -291,3 +292,4 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 }
+

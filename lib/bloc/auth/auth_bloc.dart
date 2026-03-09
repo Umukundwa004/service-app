@@ -14,6 +14,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({required AuthService authService})
     : _authService = authService,
       super(const AuthState.initial()) {
+    // Register auth event handlers for startup checks and user actions.
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthSignInRequested>(_onSignInRequested);
     on<AuthSignUpRequested>(_onSignUpRequested);
@@ -27,6 +28,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
   }
 
+  // Validate current session and resolve user profile state.
   Future<void> _onAuthCheckRequested(
     AuthCheckRequested event,
     Emitter<AuthState> emit,
@@ -89,6 +91,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // Handle sign-in workflow and map results to AuthState.
   Future<void> _onSignInRequested(
     AuthSignInRequested event,
     Emitter<AuthState> emit,
@@ -137,6 +140,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // Handle sign-up, profile creation, and post-registration state.
   Future<void> _onSignUpRequested(
     AuthSignUpRequested event,
     Emitter<AuthState> emit,
@@ -177,6 +181,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // Sign out and emit unauthenticated state.
   Future<void> _onSignOutRequested(
     AuthSignOutRequested event,
     Emitter<AuthState> emit,
@@ -229,3 +234,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     return super.close();
   }
 }
+
+
+
+
+

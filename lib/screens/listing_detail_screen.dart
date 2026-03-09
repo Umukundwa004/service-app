@@ -17,10 +17,12 @@ class ListingDetailScreen extends StatefulWidget {
 }
 
 class _ListingDetailScreenState extends State<ListingDetailScreen> {
+  // Open navigation map screen with selected destination and available listings.
   Future<void> _launchMapsNavigation() async {
     final listings = context.read<ListingBloc>().state.listings;
     await Navigator.of(context).push(
       MaterialPageRoute(
+        // Push navigation-focused map route.
         builder: (_) => NavigationMapScreen(
           destination: widget.listing,
           allListings: listings,
@@ -357,6 +359,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
 
   Widget _buildMapSection() {
     final position = latlng.LatLng(
+      // Center detail map on the stored listing coordinates.
       widget.listing.latitude,
       widget.listing.longitude,
     );
@@ -445,3 +448,6 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
     );
   }
 }
+
+
+

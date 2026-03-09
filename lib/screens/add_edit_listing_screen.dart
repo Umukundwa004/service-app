@@ -64,6 +64,7 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
     super.dispose();
   }
 
+  // Validate form, build ListingModel payload, then dispatch create/update event.
   Future<void> _saveListing() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -79,7 +80,9 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
         phone: _phoneController.text.trim(),
         email: _emailController.text.trim(),
         imageUrl: _imageUrlController.text.trim(),
+        // Parse latitude from form input before saving to Firestore.
         latitude: double.tryParse(_latitudeController.text) ?? 0.0,
+        // Parse longitude from form input before saving to Firestore.
         longitude: double.tryParse(_longitudeController.text) ?? 0.0,
         userId: widget.userId,
         createdAt: _isEditing ? widget.listing!.createdAt : DateTime.now(),
@@ -213,6 +216,7 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
                   Expanded(
                     child: _buildTextField(
                       controller: _latitudeController,
+                      // Coordinate input used by map markers/navigation views.
                       label: 'Latitude',
                       hint: 'e.g., -1.2921',
                       icon: Icons.my_location,
@@ -226,6 +230,7 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
                   Expanded(
                     child: _buildTextField(
                       controller: _longitudeController,
+                      // Longitude input complements latitude for map positioning.
                       label: 'Longitude',
                       hint: 'e.g., 36.8219',
                       icon: Icons.location_searching,

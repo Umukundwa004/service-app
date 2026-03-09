@@ -19,6 +19,7 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
     on<DeleteMyListing>(_onDeleteMyListing);
   }
 
+  // Subscribe to user-scoped listing stream.
   void _onLoadMyListings(LoadMyListings event, Emitter<MyListingsState> emit) {
     emit(state.copyWith(status: MyListingsStatus.loading));
 
@@ -54,6 +55,7 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
     Emitter<MyListingsState> emit,
   ) async {
     try {
+      // Persist a newly created listing.
       await _listingService.addListing(event.listing);
     } catch (e) {
       emit(
@@ -65,6 +67,7 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
     }
   }
 
+  // Persist listing edits to Firestore.
   Future<void> _onUpdateMyListing(
     UpdateMyListing event,
     Emitter<MyListingsState> emit,
@@ -81,6 +84,7 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
     }
   }
 
+  // Delete selected listing from Firestore.
   Future<void> _onDeleteMyListing(
     DeleteMyListing event,
     Emitter<MyListingsState> emit,
@@ -103,3 +107,7 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
     return super.close();
   }
 }
+
+
+
+

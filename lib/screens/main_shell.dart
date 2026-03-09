@@ -20,6 +20,7 @@ class MainShell extends StatefulWidget {
   State<MainShell> createState() => _MainShellState();
 }
 
+// Main authenticated shell with persistent bottom-tab navigation.
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
@@ -39,6 +40,7 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // IndexedStack preserves tab state while switching screens.
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -89,3 +91,5 @@ class _MainShellState extends State<MainShell> {
     );
   }
 }
+
+
