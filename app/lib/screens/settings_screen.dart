@@ -106,6 +106,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
         final profile = _profileFromAuthState(authState);
+        final isAuthenticated = authState.status == AuthStatus.authenticated;
 
         return Container(
           color: Colors.deepPurple,
@@ -151,8 +152,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               IconButton(
-                onPressed: () => _openProfileScreen(profile),
+                onPressed: isAuthenticated
+                    ? () => _openProfileScreen(profile)
+                    : null,
                 icon: const Icon(Icons.edit, color: Colors.white),
+                tooltip: isAuthenticated
+                    ? 'Edit profile'
+                    : 'Sign in to edit profile',
               ),
             ],
           ),
